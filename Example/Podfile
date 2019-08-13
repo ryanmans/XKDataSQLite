@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '8.0'
+
+target 'XKDataSQLite_Example' do
+  pod 'XKDataSQLite', :path => '../'
+
+  target 'XKDataSQLite_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

@@ -1,0 +1,6 @@
+framework module XKDataSQLite {
+  umbrella header "XKDataSQLite-umbrella.h"
+
+  export *
+  module * { export * }
+}

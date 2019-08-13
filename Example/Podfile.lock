@@ -1,0 +1,25 @@
+PODS:
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - XKDataSQLite (1.0.0):
+    - FMDB
+
+DEPENDENCIES:
+  - XKDataSQLite (from `../`)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - FMDB
+
+EXTERNAL SOURCES:
+  XKDataSQLite:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  XKDataSQLite: 0619d0a934f1c6f5984fc02b2675d7df04232fe5
+
+PODFILE CHECKSUM: d7ff6986ec20c8d0bfbd0a0157a81325a23dc185
+
+COCOAPODS: 1.6.0
