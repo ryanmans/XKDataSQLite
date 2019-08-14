@@ -7,6 +7,7 @@
 //
 
 #import "XKDataSQLite.h"
+#import "FMDB.h"
 #import <sqlite3.h>
 
 #define MinSleep()     [NSThread sleepForTimeInterval:0.01]
@@ -39,8 +40,8 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
 
 //数据库操作
 @interface XKDataSQLite ()
-@property (nonatomic,assign) BOOL isLock;
-@property (nonatomic,strong) dispatch_queue_t dbQueue;
+@property (nonatomic,assign)BOOL isLock;
+@property (nonatomic,strong)dispatch_queue_t dbQueue;
 @property (nonatomic,strong)FMDatabase * fmdb;
 @end
 
@@ -79,7 +80,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_open:path];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -102,7 +103,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_close];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -123,7 +124,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_isExistsDataTable:tableName];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     
     while (_isLock) MinSleep();
@@ -149,7 +150,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     
     dispatch_async(_dbQueue, ^{
         state = [self sc_createDataTable:sql];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -169,7 +170,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     
     dispatch_async(_dbQueue, ^{
         state = [self sc_createDataTable:tableName withDictionary:dictionary];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -225,7 +226,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_insertDataWithTable:tableName columnData:columnData];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -257,7 +258,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_updateDataWithTable:tableName indexName:indexName indexData:indexData columnData:columnData];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -288,7 +289,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_autoUpdateWithTable:tableName columnData:columnData indexName:indexName indexData:indexData];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -307,7 +308,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_deleteTable:tableName];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -326,7 +327,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_deleteDataWithTable:tableName indexName:indexName indexData:indexData];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -344,7 +345,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{
         state = [self sc_cleanTable:tableName];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -364,7 +365,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block NSDictionary *state = nil;
     dispatch_async(_dbQueue, ^{
         state = [self sc_queryDataWithTable:tableName indexName:indexName indexData:indexData];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -389,7 +390,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block NSArray *state = nil;
     dispatch_async(_dbQueue, ^{
         state = [self sc_queryAllDataWithTable:tableName];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -400,7 +401,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block NSMutableArray *result = nil;
     [self sc_executeQueryWithSQL:sql parameters:nil block:^(FMDatabase *database, FMResultSet *resultSet) {
         if ([resultSet next] == NO) return ;
-        result = NewMutableArray();
+        result = [NSMutableArray array];
         do{
             NSDictionary *temp = [resultSet toDictionary];
             [result addObject:temp];
@@ -419,7 +420,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     __block BOOL state = NO;
     dispatch_async(_dbQueue, ^{  //异步存储
         state = [self sc_executeUpdateWithSQL:sql parameters:parameters block:block];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
     return state;
@@ -442,7 +443,7 @@ typedef void(^DataSQLiteQueryBlock)(FMDatabase * database,FMResultSet * resultSe
     _isLock = YES;
     dispatch_async(_dbQueue, ^{
         [self sc_executeQueryWithSQL:sql parameters:parameters block:block];
-        _isLock = NO;
+        self->_isLock = NO;
     });
     while (_isLock) MinSleep();
 }
